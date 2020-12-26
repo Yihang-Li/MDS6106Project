@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def plot_data(data):
@@ -36,6 +37,9 @@ for i in np.arange(m1, m):
 plt.figure(1)
 plot_data(a)
 
+a = pd.DataFrame(a)
+a.to_csv('dataset1.csv', header=False, index=False)
+
 ''' dataset2 '''
 np.random.seed(100)
 c1 = np.array([17, 14])
@@ -57,6 +61,8 @@ for i in np.arange(m1, m):
 
 plt.figure(2)
 plot_data(a)
+a = pd.DataFrame(a)
+a.to_csv('dataset2.csv', header=False, index=False)
 
 ''' dataset2 '''
 np.random.seed(100)
@@ -84,6 +90,8 @@ for i in np.arange(m1, m):
 
 plt.figure(3)
 plot_data(a)
+a = pd.DataFrame(a)
+a.to_csv('dataset3.csv', header=False, index=False)
 
 
 
