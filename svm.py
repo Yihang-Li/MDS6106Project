@@ -24,7 +24,7 @@ def f_svm(xk, m, Lambda):
         t = 1-b[i]*(np.dot(a[i],x)[0] + y)
         Sum = Sum + phi_plus(t)
     return Lambda/2 * np.linalg.norm(x)**2 + Sum
-def df(xk, m):
+def df(xk, m, Lambda):
     x = xk[:-1]
     y = xk[-1][0]
     grad = np.zeros((x.size+1, 1))
@@ -52,19 +52,19 @@ def gradient_method(initial, m, Lambda):
     tol = 1e-8
     
     xk = initial
-    gradient = df(initial, m)
+    gradient = df(initial, m, Lambda)
     num_iteration = 0
     
     while np.linalg.norm(gradient) > tol and num_iteration < max_iter:
         alphak = s
-        dk = -df(xk, m)
+        dk = -df(xk, m, Lambda)
         while True:
-            if f_svm(xk + alphak*dk, m, Lambda) - f_svm(xk, m, Lambda) <= gamma * alphak * np.dot(df(xk, m).T, dk):
+            if f_svm(xk + alphak*dk, m, Lambda) - f_svm(xk, m, Lambda) <= gamma * alphak * np.dot(df(xk, m, Lambda).T, dk):
                 break
             alphak = alphak * sigma
         
         xk = xk + alphak * dk
-        gradient = df(xk, m)
+        gradient = df(xk, m, Lambda)
         #print(np.linalg.norm(gradient))
         #print(xk)
         print(f_svm(xk + alphak*dk, m, Lambda))
@@ -77,21 +77,21 @@ def AGM(initial, m, Lambda):
     alpha = 0.5
     yita = 0.5
     tol = 1e-8
-    gradient = df(initial, m)
+    gradient = df(initial, m, Lambda)
     num_iteration = 0
     
     while np.linalg.norm(gradient) > tol and num_iteration < max_iter:
         betak = 1/tk * (t_minus - 1)
         yk = xk + betak * (xk - x_minus)
-        x_bar = yk - alpha * df(yk, m)
-        while f_svm(x_bar, m, Lambda) - f_svm(yk, m, Lambda) > -alpha/2 * np.linalg.norm(df(yk, m))**2:
+        x_bar = yk - alpha * df(yk, m, Lambda)
+        while f_svm(x_bar, m, Lambda) - f_svm(yk, m, Lambda) > -alpha/2 * np.linalg.norm(df(yk, m, Lambda))**2:
             alpha = alpha * yita
-            x_bar = yk - alpha * df(yk, m)
+            x_bar = yk - alpha * df(yk, m, Lambda)
         t_minus = tk
         tk = 0.5 * (1 + np.sqrt(1+4*tk**2))
         x_minus = xk
         xk = x_bar
-        gradient = df(xk, m)
+        gradient = df(xk, m, Lambda)
         num_iteration = num_iteration + 1
         print(np.linalg.norm(gradient))
     print(xk)
@@ -103,27 +103,28 @@ def BFGS(initial, m, Lambda):
     sigma = 0.5
     gamma = 0.1
     tol = 1e-4
-    gradient = df(initial, m)
+    gradient = df(initial, m, Lambda)
     num_iteration = 0
     
     while np.linalg.norm(gradient) > tol and num_iteration < max_iter:
         alphak = s
-        dk = -np.dot(Hk, df(xk, m))
+        dk = -np.dot(Hk, df(xk, m, Lambda))
         while True:
-            if f_svm(xk + alphak*dk, m, Lambda) - f_svm(xk, m, Lambda) <= gamma * alphak * np.dot(df(xk, m).T, dk):
+            if f_svm(xk + alphak*dk, m, Lambda) - f_svm(xk, m, Lambda) <= gamma * alphak * np.dot(df(xk, m, Lambda).T, dk):
                 break
             alphak = alphak * sigma
         xk_new = xk + alphak * dk
         
         sk = xk_new - xk
-        yk = df(xk_new, m) - df(xk, m)
+        yk = df(xk_new, m, Lambda) - df(xk, m, Lambda)
         if np.dot(sk.T, yk) <= 1e-14:
             pass
         else:
             Hk = Hk + np.dot((sk - np.dot(Hk, yk)), sk.T)/(np.dot(sk.T, yk)) - np.dot((sk-np.dot(Hk, yk)).T, yk)/(np.dot(sk.T, yk)**2) * np.dot(sk, sk.T)
         num_iteration = num_iteration + 1
         xk = xk_new
-        gradient = df(xk, m)
+        gradient = df(xk, m, Lambda)
+        print(num_iteration)
         print(np.linalg.norm(gradient))
         
     print(xk)
@@ -142,8 +143,8 @@ initial = np.zeros((n+1, 1)) #the last element is y
 m = b.size
 
 #gradient_method(initial, m, Lambda)
-#AGM(initial, m, Lambda)
-BFGS(initial, m, Lambda)
+AGM(initial, m, Lambda)
+#BFGS(initial, m, Lambda)
 
 
 
