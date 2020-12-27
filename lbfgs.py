@@ -33,15 +33,6 @@ diminishing = lambda k: 0.01/np.log10(k+2)
 #exact by using golden section
 #Note: w.r.t alpha, f is a 1-D function, this is why we can use golden section to perform exact line search
 
-def exact(f, x_k: np.array, d_k: np.array, tol: float):
-    """
-    Input: funtion f, current point x_k, current_direction d_k, tolerence tol
-    Output: current exact step size alpha_k by using golden section
-    """
-    phi = lambda alpha: f(x_k + alpha*d_k)
-    alpha_k, _ = Golden_Section(phi, 0, 2, tol)
-    
-    return alpha_k
 
 #backtrack(armijo)
 
@@ -55,6 +46,10 @@ def armijo(f, f_grad, x_k: np.array, d_k: np.array, s: float, sigma: float, gamm
     while f(x_k + alpha_k*d_k) - f(x_k) > gamma*alpha_k*f_grad(x_k).dot(d_k):
         alpha_k *= sigma
     return alpha_k
+
+#define our stepsize_strategies dictionary
+stepsize_strategies = {"diminishing": diminishing, "exact": exact, "backtrack": armijo}
+
 
 def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m_lbfgs: int):
     """
