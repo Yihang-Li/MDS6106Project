@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import time
 from scipy import sparse
 
 def phi_plus(t):
@@ -9,22 +10,12 @@ def phi_plus(t):
     else:
         return t - delta/2
 
-def d_phi_plus(t):
-    if t < 0:
-        return 0
-    elif t > delta:
-        return 1
-    else:
-        return t/delta
 def f_svm(xk, m, Lambda):
     x = xk[:-1]
     y = xk[-1][0]
-    Sum = 0
-    for i in np.arange(m):
-        t = 1-b[i]*(np.dot(a[i],x)[0] + y)
-        Sum = Sum + phi_plus(t)
-    return Lambda/2 * np.linalg.norm(x)**2 + Sum
+    return Lambda/2 * np.linalg.norm(x)**2 + sum(map(phi_plus, 1 - b * (np.dot(a,x) + y).reshape(-1)))
 def df(xk, m, Lambda):
+    '''
     x = xk[:-1]
     y = xk[-1][0]
     grad = np.zeros((x.size+1, 1))
@@ -43,8 +34,57 @@ def df(xk, m, Lambda):
         Sum = Sum + d_phi_plus(t)*(-b[i])
     grad[x.size] = Sum
     return grad
-
-#gradient method
+    
+    '''
+    x = xk[:-1]
+    y = xk[-1][0]
+    grad = np.zeros((x.size+1, 1))
+    t = 1 - b * (np.dot(a,x) + y).reshape(-1)
+    dphi_list = np.zeros(m)
+    dphi_list[t>delta] = 1
+    dphi_list[(0<t) & (t<delta)] = t[(0<t) & (t<delta)]/delta
+    grad[:-1] = Lambda*x + np.sum(dphi_list.reshape(-1,1) * (-b.reshape(-1,1) * a), axis=0).reshape(-1,1)
+    grad[x.size] = np.sum(-dphi_list * b)
+    return grad
+def plot_result(m, xk):
+    m1 = m2 = 0
+    for i in np.arange(m):
+        if b[i] == 1:
+            m1 = m1 + 1
+        else:
+            m2 = m2 + 1
+            
+    s = 2 # control the point size
+    x = a[0:m1, 0]
+    y = a[0:m1, 1]
+    plt.scatter(x, y, c='purple', s=s)
+    x = a[m1:, 0]
+    y = a[m1:, 1]
+    plt.scatter(x, y, c='orange', s=s)
+    
+    A = xk[0][0]
+    B = xk[1][0]
+    C = xk[2][0]
+    x = a[:,0]
+    y = (-A*x-C)/B
+    plt.plot(x, y, color='red')
+def test(xk):
+    data = pd.read_csv('./test_dataset_csv_files/test_dataset1.csv', header=None)
+    a = np.array(data.iloc[:, 0:2])
+    b = np.array(data.iloc[:, 2])
+    m_test = b.size
+    x = xk[:-1]
+    y = xk[-1][0]
+    
+    accuracy = 0
+    p = np.zeros(m_test)
+    for i in np.arange(m_test):
+        if np.dot(a[i], x)[0] + y > 0:
+            p[i] = 1
+        else:
+            p[i] = -1
+    accuracy = np.sum(np.abs(p + b)) / (2*m_test)
+    return accuracy
 def gradient_method(initial, m, Lambda):
     s = 1
     sigma = 0.5
@@ -67,9 +107,11 @@ def gradient_method(initial, m, Lambda):
         gradient = df(xk, m, Lambda)
         #print(np.linalg.norm(gradient))
         #print(xk)
-        print(f_svm(xk + alphak*dk, m, Lambda))
+        print(np.linalg.norm(gradient))
         num_iteration = num_iteration + 1
     print(xk)
+    plot_result(m, xk)
+    print(test(xk))
 
 def AGM(initial, m, Lambda):
     x_minus = xk = initial
@@ -95,6 +137,8 @@ def AGM(initial, m, Lambda):
         num_iteration = num_iteration + 1
         print(np.linalg.norm(gradient))
     print(xk)
+    plot_result(m, xk)
+    print(test(xk))
 
 def BFGS(initial, m, Lambda):
     Hk = np.identity(n+1)
@@ -128,14 +172,16 @@ def BFGS(initial, m, Lambda):
         print(np.linalg.norm(gradient))
         
     print(xk)
+    plot_result(m, xk)
+    print(test(xk))
     
 # Main begin
 n = 2 #number of features
 delta = 1e-3
 Lambda = 0.1
-max_iter = 1000
+max_iter = 10000
 
-data = pd.read_csv('./dataset2.csv', header=None)
+data = pd.read_csv('./dataset_csv_files/dataset1.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
 
@@ -143,34 +189,8 @@ initial = np.zeros((n+1, 1)) #the last element is y
 m = b.size
 
 #gradient_method(initial, m, Lambda)
-AGM(initial, m, Lambda)
-#BFGS(initial, m, Lambda)
-
-
-
-
-'''
-m1 = 1000
-m2 = 1000
-def plot_data():
-    s = 0.7 # control the point size
-    x = a[0:m1, 0]
-    y = a[0:m1, 1]
-    plt.scatter(x, y, c='purple', s=s)
-    
-    x = a[m1:, 0]
-    y = a[m1:, 1]
-    plt.scatter(x, y, c='orange', s=s)
-plot_data()
-
-A = 1.23080664
-B = -1.27891814
-C = 1.39519902
-x = a[:,0]
-y = (-A*x-C)/B
-plt.plot(x, y, color='red')
-'''
-
+#GM(initial, m, Lambda)
+BFGS(initial, m, Lambda)
 
 
 
