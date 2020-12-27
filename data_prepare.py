@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def plot_data(data):
-    s = 0.7 # control the point size
+    s = 1 # control the point size
     x = a[0:m1, 0]
     y = a[0:m1, 1]
     plt.scatter(x, y, c='purple', s=s)
@@ -19,27 +19,28 @@ def plot_data(data):
 n = 2 #number of feature
 np.random.seed(100)
 
-''' dataset1 '''
-c1 = np.array([5, 5])
-c2 = np.array([10,20])
-sigma1 = sigma2 = 2.5
-mean1 = mean2 = 0
-m1 = m2 = 4000
-
-
-m = m1 + m2
-a = np.zeros((m, n))
-b = np.zeros((m, 1))
-
-for i in np.arange(m1):
+def generate_data(c1, c2, sigma1, sigma2, m1, m2):
+    m = m1 + m2
+    a = np.zeros((m, n))
+    b = np.zeros((m, 1))
+    for i in np.arange(m1):
     a[i] = c1 + np.random.normal(mean1, sigma1, n)
     b[i] = 1
-for i in np.arange(m1, m):
+    for i in np.arange(m1, m):
     a[i] = c2 + np.random.normal(mean2, sigma2, n)
     b[i] = -1
-    
-plt.figure(1)
-plot_data(a)
+    plt.figure(1)
+    plot_data(a)
+
+
+
+''' dataset1 '''
+c1 = np.array([5, 5])
+c2 = np.array([10,15])
+sigma1 = sigma2 = 2.5
+mean1 = mean2 = 0
+m1 = m2 = 1000
+
 
 a = pd.DataFrame(a)
 b = pd.DataFrame(b)
@@ -72,7 +73,7 @@ b = pd.DataFrame(b)
 data = pd.concat([a, b], axis=1)
 data.to_csv('dataset2.csv', header=False, index=False)
 
-''' dataset2 '''
+''' dataset3 '''
 c1 = np.array([10, 15])
 c2 = np.array([15, 10])
 sigma1 = 3
@@ -104,7 +105,31 @@ b = pd.DataFrame(b)
 data = pd.concat([a, b], axis=1)
 data.to_csv('dataset3.csv', header=False, index=False)
 
+''' dataset4 '''
+c1 = np.array([0, 1])
+c2 = np.array([1, 0])
+sigma1 = 0.5
+sigma2 = 0.5
+mean1 = mean2 = 0
+m1 = m2 = 3000
 
+m = m1 + m2
+a = np.zeros((m, n))
+b = np.zeros((m, 1))
+
+for i in np.arange(m1):
+    a[i] = c1 + np.random.normal(mean1, sigma1, n)
+    b[i] = 1
+for i in np.arange(m1, m):
+    a[i] = c2 + np.random.normal(mean2, sigma2, n)
+    b[i] = -1
+
+plt.figure(4)
+plot_data(a)
+a = pd.DataFrame(a)
+b = pd.DataFrame(b)
+data = pd.concat([a, b], axis=1)
+data.to_csv('dataset4.csv', header=False, index=False)
 
 
 
