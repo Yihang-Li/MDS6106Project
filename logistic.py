@@ -2,34 +2,29 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def f_logit(xk, m, Lambda):
+def f_logit(xk, Lambda):
     x, y = xk[:-1], xk[-1]
-    Sum = 0
-    for i in np.arange(m):
-        Log = np.log(1+np.exp(-b[i]*(a[i].dot(x)+y)))
-        Sum += Log
-    return Lambda/2 * np.linalg.norm(x)**2 + Sum/m
-def df_logit(xk, m, Lambda):
+    Log = np.log(1+np.exp(-b*(a.dot(x)+y)))
+    return Lambda/2 * np.linalg.norm(x)**2 + Log.sum()/m
+
+def df_logit(xk, Lambda):
     x = xk[:-1]
     y = xk[-1]
 
-    grad = np.zeros((x.size+1, 1))
+    grad = np.zeros((x.size+1, 1)).reshape(-1)
     # derivative for x1-xn 
-    for k in np.arange(x.size): #df_xk
-        Sum = 0
-        for i in np.arange(m):
-            df_Log = np.exp(-b[i]*(a[i].dot(x)+y))/(1+np.exp(-b[i]*(a[i].dot(x)+y)))*(-b[i]*a[i])[k]
-            Sum = Sum + df_Log
-        grad[k] = Lambda * x[k] + Sum/m
-        
+    df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1,1)*(-b.reshape(-1, 1)*a)
+#     print(df_Log)
+#     print(np.sum(df_Log,axis=0))
+#     print(x)
+#     print(grad[:-1])
+    grad[:-1] = Lambda * x + np.sum(df_Log,axis=0)/m
+    
     # derivative for y
-    Sum = 0
-    for i in np.arange(m):
-        df_Log = np.exp(-b[i]*(a[i].dot(x)+y))/(1+np.exp(-b[i]*(a[i].dot(x)+y)))*(-b[i])
-        Sum = Sum + df_Log
-    grad[x.size] = Sum/m
+    df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1,1)*(-b)
+#     print(df_Log)
+    grad[x.size] = df_Log.sum()/m
     return grad.reshape(-1,)
-
 #Stepsize
 #diminishing with pre-defined alpha_k 
 diminishing = lambda k: 0.01/np.log10(k+2)
