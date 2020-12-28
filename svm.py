@@ -69,7 +69,7 @@ def plot_result(m, xk):
     y = (-A*x-C)/B
     plt.plot(x, y, color='red')
 def test(xk):
-    data = pd.read_csv('./test_dataset_csv_files/test_dataset1.csv', header=None)
+    data = pd.read_csv('./test_dataset_csv_files/test_dataset2.csv', header=None)
     a = np.array(data.iloc[:, 0:2])
     b = np.array(data.iloc[:, 2])
     m_test = b.size
@@ -181,7 +181,7 @@ delta = 1e-3
 Lambda = 0.1
 max_iter = 10000
 
-data = pd.read_csv('./dataset_csv_files/dataset1.csv', header=None)
+data = pd.read_csv('./dataset_csv_files/dataset2.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
 
@@ -190,7 +190,7 @@ m = b.size
 
 #gradient_method(initial, m, Lambda)
 #GM(initial, m, Lambda)
-BFGS(initial, m, Lambda)
+#BFGS(initial, m, Lambda)
 
 
 

@@ -2,6 +2,56 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
+def plot_result(m, xk):
+    m1 = m2 = 0
+    for i in np.arange(m):
+        if b[i] == 1:
+            m1 = m1 + 1
+        else:
+            m2 = m2 + 1
+            
+    s = 2 # control the point size
+    x = a[0:m1, 0]
+    y = a[0:m1, 1]
+    plt.scatter(x, y, c='purple', s=s)
+    x = a[m1:, 0]
+    y = a[m1:, 1]
+    plt.scatter(x, y, c='orange', s=s)
+    
+    A = xk[0][0]
+    B = xk[1][0]
+    C = xk[2][0]
+    x = a[:,0]
+    y = (-A*x-C)/B
+    plt.plot(x, y, color='red')
+    
+def phi_plus(t):
+    if t <= delta:
+        return 1/(2*delta) * (max(0, t)**2)
+    else:
+        return t - delta/2
+
+def f_svm(xk, m, Lambda):
+    xk = xk.reshape(-1, 1)
+    x = xk[:-1]
+    y = xk[-1][0]
+    return Lambda/2 * np.linalg.norm(x)**2 + sum(map(phi_plus, 1 - b * (np.dot(a,x) + y).reshape(-1)))
+def df(xk, m, Lambda):
+    xk = xk.reshape(-1, 1)
+    x = xk[:-1]
+    y = xk[-1][0]
+    grad = np.zeros((x.size+1, 1))
+    t = 1 - b * (np.dot(a,x) + y).reshape(-1)
+    dphi_list = np.zeros(m)
+    dphi_list[t>delta] = 1
+    dphi_list[(0<t) & (t<delta)] = t[(0<t) & (t<delta)]/delta
+    grad[:-1] = Lambda*x + np.sum(dphi_list.reshape(-1,1) * (-b.reshape(-1,1) * a), axis=0).reshape(-1,1)
+    grad[x.size] = np.sum(-dphi_list * b)
+    return grad.reshape(-1)
+
+
+
 def f_logit(xk, Lambda):
     x, y = xk[:-1], xk[-1]
     Log = np.log(1+np.exp(-b*(a.dot(x)+y)))
@@ -33,28 +83,6 @@ def armijo(f, f_grad, x_k: np.array, d_k: np.array, s: float, sigma: float, gamm
 #define our stepsize_strategies dictionary
 stepsize_strategies = {"backtrack": armijo}
 
-def plot_result(m, xk):
-    m1 = m2 = 0
-    for i in np.arange(m):
-        if b[i] == 1:
-            m1 = m1 + 1
-        else:
-            m2 = m2 + 1
-            
-    s = 2 # control the point size
-    x = a[0:m1, 0]
-    y = a[0:m1, 1]
-    plt.scatter(x, y, c='purple', s=s)
-    x = a[m1:, 0]
-    y = a[m1:, 1]
-    plt.scatter(x, y, c='orange', s=s)
-    
-    A = xk[0][0]
-    B = xk[1][0]
-    C = xk[2][0]
-    x = a[:,0]
-    y = (-A*x-C)/B
-    plt.plot(x, y, color='red')
 def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m_lbfgs: int):
     """
     Input: funtion: f, the gradient of f: f_grad, initial point: x_0, tolerence: tol,
@@ -152,6 +180,7 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
 # Main begin
 n = 2 #number of features
 Lambda = 0.1
+delta = 1e-3
 max_iter = 1000
 
 data = pd.read_csv('./dataset_csv_files/dataset1.csv', header=None)
@@ -161,6 +190,6 @@ b = np.array(data.iloc[:, 2])
 initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
 m = b.size
 
-lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-7, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
+lbfgs_result = L_BFGS(lambda x_k: f_svm(x_k, m, Lambda), lambda x_k: df(x_k, m, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
 
 lbfgs_result
