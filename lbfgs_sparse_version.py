@@ -25,8 +25,8 @@ def df_logit(xk, Lambda):
 
 def test(xk):
     
-    a = loadmat('../final_project/datasets/rcv1/rcv1_train.mat')['A']
-    b = loadmat('../final_project/datasets/rcv1/rcv1_train_label.mat')['b'].reshape(-1)
+    a = loadmat('../final_project/datasets/news20/news20_train.mat')['A']
+    b = loadmat('../final_project/datasets/news20/news20_train_label.mat')['b'].reshape(-1)
     m_test = b.size
     x = xk[:-1]
     y = xk[-1][0]
@@ -176,8 +176,8 @@ b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy
 m, n = a.shape
 """
 
-a = loadmat('../final_project/datasets/rcv1/rcv1_train.mat')['A']
-b = loadmat('../final_project/datasets/rcv1/rcv1_train_label.mat')['b'].reshape(-1)
+a = loadmat('../final_project/datasets/news20/news20_train.mat')['A']
+b = loadmat('../final_project/datasets/news20/news20_train_label.mat')['b'].reshape(-1)
 m, n = a.shape
 
 initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y

@@ -4,6 +4,8 @@ import pandas as pd
 import time
 from scipy import sparse
 
+plt.style.use("ggplot")
+
 def phi_plus(t):
     if t <= delta:
         return 1/(2*delta) * (max(0, t)**2)

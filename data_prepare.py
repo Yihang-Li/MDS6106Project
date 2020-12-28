@@ -6,7 +6,7 @@ import pandas as pd
 plt.style.use("ggplot")
 
 def plot_data(data):
-    s = 3 # control the point size
+    s = 5 # control the point size
     x = data[0:m1, 0]
     y = data[0:m1, 1]
     plt.scatter(x, y, c='purple', s=s)
@@ -14,7 +14,8 @@ def plot_data(data):
     x = data[m1:, 0]
     y = data[m1:, 1]
     plt.scatter(x, y, c='orange', s=s)
-    
+    plt.xlabel(r'$a_1$')
+    plt.ylabel(r'$a_2$')
     
 n = 2 #number of feature
 np.random.seed(100)
@@ -41,7 +42,8 @@ def generate_data(c1, c2, sigma1, sigma2, m1, m2, dataset_num):
         b[i] = -1
     plt.figure(dataset_num)
     plot_data(a)
-    path = 'dataset'+str(dataset_num)+'.png'
+    path = 'dataset'+str(dataset_num)+'.pdf'
+    
     plt.savefig("./dataset_figures/"+path, dpi=1000)
     a = pd.DataFrame(a)
     b = pd.DataFrame(b)
