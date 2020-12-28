@@ -188,7 +188,7 @@ b = np.array(data.iloc[:, 2])
 initial = np.zeros((n+1, 1)) #the last element is y
 m = b.size
 
-#gradient_method(initial, m, Lambda)
+gradient_method(initial, m, Lambda)
 #GM(initial, m, Lambda)
 #BFGS(initial, m, Lambda)
 
