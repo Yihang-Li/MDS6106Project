@@ -3,10 +3,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-
+plt.style.use("ggplot")
 
 def plot_data(data):
-    s = 2 # control the point size
+    s = 3 # control the point size
     x = data[0:m1, 0]
     y = data[0:m1, 1]
     plt.scatter(x, y, c='purple', s=s)

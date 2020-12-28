@@ -38,9 +38,9 @@ def df_logit(xk, Lambda):
 
     grad = np.zeros((x.size+1, 1)).reshape(-1)
     
-    t = np.exp(-b.reshape(-1)*(a @ x+y).reshape(-1))
+    t = np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1))
     
-    df_Log = (t /(1+t))*(-b) @ a
+    df_Log = np.dot((t /(1+t))*(-b), a)
     grad[:-1] = Lambda * x + df_Log/m
     df_Log = (t /(1+t))*(-b)
     grad[x.size] = df_Log.sum()/m

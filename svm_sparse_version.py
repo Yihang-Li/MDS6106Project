@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import time
 from scipy import sparse
+from scipy.io import loadmat
 
 def phi_plus(t):
     if t <= delta:
@@ -47,23 +48,15 @@ def plot_result(m, xk):
     x = a[:,0].toarray()
     y = (-A*x-C)/B
     plt.plot(x, y, color='red')
-def test(xk, dataset_num):
-    data = pd.read_csv('./test_dataset_csv_files/test_dataset'+str(dataset_num)+'.csv', header=None)
-    a = np.array(data.iloc[:, 0:2])
-    b = np.array(data.iloc[:, 2])
+def test(xk):
+    
+    a = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train.mat')['A']
+    b = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train_label.mat')['b'].reshape(-1)
     m_test = b.size
     x = xk[:-1]
     y = xk[-1][0]
-    
-    accuracy = 0
-    p = np.zeros(m_test)
-    for i in np.arange(m_test):
-        if np.dot(a[i], x)[0] + y > 0:
-            p[i] = 1
-        else:
-            p[i] = -1
-    accuracy = np.sum(np.abs(p + b)) / (2*m_test)
-    return accuracy
+    accuracy = np.sum(np.abs((2 * ((a.dot(x) + y > 0) + 0) - 1).reshape(-1) + b))/(2*m_test)
+    return accuracy   
 def gradient_method(initial, m, Lambda):
     s = 1
     sigma = 0.5
@@ -90,7 +83,7 @@ def gradient_method(initial, m, Lambda):
         num_iteration = num_iteration + 1
     print(xk)
     plot_result(m, xk)
-    print(test(xk, dataset_num))
+    print(test(xk))
 
 def AGM(initial, m, Lambda):
     x_minus = xk = initial
@@ -117,7 +110,7 @@ def AGM(initial, m, Lambda):
         print(np.linalg.norm(gradient))
     print(xk)
     plot_result(m, xk)
-    print(test(xk, dataset_num))
+    print(test(xk))
 
 def BFGS(initial, m, Lambda):
     Hk = np.identity(n+1)
@@ -143,7 +136,10 @@ def BFGS(initial, m, Lambda):
         if np.dot(sk.T, yk) <= 1e-14:
             pass
         else:
-            Hk = Hk + np.dot((sk - np.dot(Hk, yk)), sk.T)/(np.dot(sk.T, yk)) - np.dot((sk-np.dot(Hk, yk)).T, yk)/(np.dot(sk.T, yk)**2) * np.dot(sk, sk.T)
+            Hk = Hk + (np.dot((sk - np.dot(Hk, yk)), sk.T) + \
+                       np.dot(sk, (sk-np.dot(Hk, yk)).T))/(np.dot(sk.T, yk)) \
+                - np.dot((sk-np.dot(Hk, yk)).T, yk)/(np.dot(sk.T, yk)**2) * \
+                    np.dot(sk, sk.T)
         num_iteration = num_iteration + 1
         xk = xk_new
         gradient = df(xk, m, Lambda)
@@ -152,17 +148,22 @@ def BFGS(initial, m, Lambda):
         
     print(xk)
     plot_result(m, xk)
-    print(test(xk, dataset_num))
+    print(test(xk))
     
 # Main begin
 n = 2 #number of features
 delta = 1e-3
 Lambda = 0.1
-max_iter = 100000
+max_iter = 20000
 
+"""
 dataset_num = 1
 a = sparse.load_npz('./dataset_sparse_files/dataset'+str(dataset_num)+'_train.npz')
 b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy')
+"""
+a = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train.mat')['A']
+b = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train_label.mat')['b'].reshape(-1)
+m, n = a.shape
 
 
 initial = np.zeros((n+1, 1)) #the last element is y

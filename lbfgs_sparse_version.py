@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import sparse
+from scipy.io import loadmat
 
 def f_logit(xk, Lambda):
     x, y = xk[:-1], xk[-1]
@@ -21,6 +22,16 @@ def df_logit(xk, Lambda):
     df_Log = (t /(1+t))*(-b)
     grad[x.size] = df_Log.sum()/m
     return grad.reshape(-1,)
+
+def test(xk):
+    
+    a = loadmat('../final_project/datasets/rcv1/rcv1_train.mat')['A']
+    b = loadmat('../final_project/datasets/rcv1/rcv1_train_label.mat')['b'].reshape(-1)
+    m_test = b.size
+    x = xk[:-1]
+    y = xk[-1][0]
+    accuracy = np.sum(np.abs((2 * ((a.dot(x) + y > 0) + 0) - 1).reshape(-1) + b))/(2*m_test)
+    return accuracy   
 
 #backtrack(armijo)
 def armijo(f, f_grad, x_k: np.array, d_k: np.array, s: float, sigma: float, gamma: float):
@@ -150,16 +161,23 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
             break 
     
     xk_result = np.array(result[-1][1]).reshape(-1,1)
-    plot_result(m, xk_result)
+    #plot_result(m, xk_result)
+    print(test(xk_result))
     return result
 
 # Main begin
 Lambda = 0.1
 max_iter = 10000
 
+"""
 dataset_num = 1
 a = sparse.load_npz('./dataset_sparse_files/dataset'+str(dataset_num)+'_train.npz')
 b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy')
+m, n = a.shape
+"""
+
+a = loadmat('../final_project/datasets/rcv1/rcv1_train.mat')['A']
+b = loadmat('../final_project/datasets/rcv1/rcv1_train_label.mat')['b'].reshape(-1)
 m, n = a.shape
 
 initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y

@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy import sparse
+from scipy.io import loadmat
 
 #diminishing with pre-defined alpha_k 
-diminishing = lambda k: 1/np.log10(k+2)
+diminishing = lambda k: 0.1/np.log10(k+2)
 
 def plot_result(m, xk):
     m1 = m2 = 0
@@ -14,17 +16,17 @@ def plot_result(m, xk):
             m2 = m2 + 1
             
     s = 2 # control the point size
-    x = a[0:m1, 0]
-    y = a[0:m1, 1]
+    x = a[0:m1, 0].toarray()
+    y = a[0:m1, 1].toarray()
     plt.scatter(x, y, c='purple', s=s)
-    x = a[m1:, 0]
-    y = a[m1:, 1]
+    x = a[m1:, 0].toarray()
+    y = a[m1:, 1].toarray()
     plt.scatter(x, y, c='orange', s=s)
     
     A = xk[0][0]
     B = xk[1][0]
     C = xk[2][0]
-    x = a[:,0]
+    x = a[:,0].toarray()
     y = (-A*x-C)/B
     plt.plot(x, y, color='red')
 
@@ -61,6 +63,8 @@ def Stochastic_gradient_method(f_i, f_grad_i, x_0: np.array, batch: int, tol: fl
     
      
     while np.mean([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index], axis=0) > tol:
+        np.random.seed(k) #for each k, the batch set is different
+        batch_index = np.random.randint(low = 0, high = m, size = batch) 
         d_k = -np.mean([f_grad_i(x_k, i) for i in batch_index], axis=0)
     
         alpha_k = diminishing(k)
@@ -77,7 +81,7 @@ def Stochastic_gradient_method(f_i, f_grad_i, x_0: np.array, batch: int, tol: fl
         result.append([k, x_k.tolist(), alpha_k, np.mean([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index], axis=0)])
     
     xk_result = np.array(result[-1][1]).reshape(-1,1)
-    plot_result(m, xk_result)    
+    #plot_result(m, xk_result)    
     return result
 
 # Main begin
@@ -85,10 +89,14 @@ delta = 1e-3
 Lambda = 0.1
 max_iter = 10000
 
-dataset_num = 4
-data = pd.read_csv('./dataset_csv_files/dataset'+str(dataset_num)+'.csv', header=None)
-a = np.array(data.iloc[:, 0:2])
-b = np.array(data.iloc[:, 2])
+"""
+dataset_num = 1
+a = sparse.load_npz('./dataset_sparse_files/dataset'+str(dataset_num)+'_train.npz')
+b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy')
+m, n = a.shape
+"""
+a = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train.mat')['A']
+b = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train_label.mat')['b'].reshape(-1)
 m, n = a.shape
 
 initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
