@@ -14,7 +14,7 @@ def df_logit(xk, Lambda):
     grad = np.zeros((x.size+1, 1)).reshape(-1)
     df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1,1)*(-b.reshape(-1, 1)*a)
     grad[:-1] = Lambda * x + np.sum(df_Log,axis=0)/m
-    df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1,1)*(-b)
+    df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1)*(-b)
     grad[x.size] = df_Log.sum()/m
     return grad.reshape(-1,)
 
@@ -154,7 +154,7 @@ n = 2 #number of features
 Lambda = 0.1
 max_iter = 1000
 
-data = pd.read_csv('./dataset_csv_files/dataset1.csv', header=None)
+data = pd.read_csv('./dataset_csv_files/dataset4.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
 
