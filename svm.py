@@ -15,27 +15,6 @@ def f_svm(xk, m, Lambda):
     y = xk[-1][0]
     return Lambda/2 * np.linalg.norm(x)**2 + sum(map(phi_plus, 1 - b * (np.dot(a,x) + y).reshape(-1)))
 def df(xk, m, Lambda):
-    '''
-    x = xk[:-1]
-    y = xk[-1][0]
-    grad = np.zeros((x.size+1, 1))
-    # derivative for x1-xn 
-    for k in np.arange(x.size): #df_xk
-        Sum = 0
-        for i in np.arange(m):
-            t = 1-b[i]*(np.dot(a[i],x)[0] + y)
-            Sum = Sum + d_phi_plus(t)*(-b[i]*a[i][k])
-        grad[k] = Lambda * x[k] + Sum
-    
-    # derivative for y
-    Sum = 0
-    for i in np.arange(m):
-        t = 1-b[i]*(np.dot(a[i],x)[0] + y)
-        Sum = Sum + d_phi_plus(t)*(-b[i])
-    grad[x.size] = Sum
-    return grad
-    
-    '''
     x = xk[:-1]
     y = xk[-1][0]
     grad = np.zeros((x.size+1, 1))
@@ -43,7 +22,7 @@ def df(xk, m, Lambda):
     dphi_list = np.zeros(m)
     dphi_list[t>delta] = 1
     dphi_list[(0<t) & (t<delta)] = t[(0<t) & (t<delta)]/delta
-    grad[:-1] = Lambda*x + np.sum(dphi_list.reshape(-1,1) * (-b.reshape(-1,1) * a), axis=0).reshape(-1,1)
+    grad[:-1] = Lambda*x + np.dot(dphi_list * (-b), a).reshape(-1,1)
     grad[x.size] = np.sum(-dphi_list * b)
     return grad
 def plot_result(m, xk):
@@ -68,8 +47,8 @@ def plot_result(m, xk):
     x = a[:,0]
     y = (-A*x-C)/B
     plt.plot(x, y, color='red')
-def test(xk):
-    data = pd.read_csv('./test_dataset_csv_files/test_dataset2.csv', header=None)
+def test(xk, dataset_num):
+    data = pd.read_csv('./test_dataset_csv_files/test_dataset'+str(dataset_num)+'.csv', header=None)
     a = np.array(data.iloc[:, 0:2])
     b = np.array(data.iloc[:, 2])
     m_test = b.size
@@ -111,7 +90,7 @@ def gradient_method(initial, m, Lambda):
         num_iteration = num_iteration + 1
     print(xk)
     plot_result(m, xk)
-    print(test(xk))
+    print(test(xk, dataset_num))
 
 def AGM(initial, m, Lambda):
     x_minus = xk = initial
@@ -138,7 +117,7 @@ def AGM(initial, m, Lambda):
         print(np.linalg.norm(gradient))
     print(xk)
     plot_result(m, xk)
-    print(test(xk))
+    print(test(xk, dataset_num))
 
 def BFGS(initial, m, Lambda):
     Hk = np.identity(n+1)
@@ -173,24 +152,25 @@ def BFGS(initial, m, Lambda):
         
     print(xk)
     plot_result(m, xk)
-    print(test(xk))
+    print(test(xk, dataset_num))
     
 # Main begin
 n = 2 #number of features
 delta = 1e-3
 Lambda = 0.1
-max_iter = 10000
+max_iter = 100000
 
-data = pd.read_csv('./dataset_csv_files/dataset2.csv', header=None)
+dataset_num = 1
+data = pd.read_csv('./dataset_csv_files/dataset'+str(dataset_num)+'.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
 
 initial = np.zeros((n+1, 1)) #the last element is y
 m = b.size
 
-gradient_method(initial, m, Lambda)
-#GM(initial, m, Lambda)
-#BFGS(initial, m, Lambda)
+#gradient_method(initial, m, Lambda)
+#AGM(initial, m, Lambda)
+BFGS(initial, m, Lambda)
 
 
 
