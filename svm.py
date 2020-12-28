@@ -155,7 +155,6 @@ def BFGS(initial, m, Lambda):
     print(test(xk, dataset_num))
     
 # Main begin
-n = 2 #number of features
 delta = 1e-3
 Lambda = 0.1
 max_iter = 100000
@@ -164,9 +163,9 @@ dataset_num = 1
 data = pd.read_csv('./dataset_csv_files/dataset'+str(dataset_num)+'.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
+m, n = a.shape
 
 initial = np.zeros((n+1, 1)) #the last element is y
-m = b.size
 
 #gradient_method(initial, m, Lambda)
 #AGM(initial, m, Lambda)

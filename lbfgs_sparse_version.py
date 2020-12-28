@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy import sparse
 
 def f_logit(xk, Lambda):
     x, y = xk[:-1], xk[-1]
@@ -45,17 +46,17 @@ def plot_result(m, xk):
             m2 = m2 + 1
             
     s = 2 # control the point size
-    x = a[0:m1, 0]
-    y = a[0:m1, 1]
+    x = a[0:m1, 0].toarray()
+    y = a[0:m1, 1].toarray()
     plt.scatter(x, y, c='purple', s=s)
-    x = a[m1:, 0]
-    y = a[m1:, 1]
+    x = a[m1:, 0].toarray()
+    y = a[m1:, 1].toarray()
     plt.scatter(x, y, c='orange', s=s)
     
     A = xk[0][0]
     B = xk[1][0]
     C = xk[2][0]
-    x = a[:,0]
+    x = a[:,0].toarray()
     y = (-A*x-C)/B
     plt.plot(x, y, color='red')
 def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m_lbfgs: int):
@@ -153,16 +154,15 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
     return result
 
 # Main begin
-n = 2 #number of features
 Lambda = 0.1
 max_iter = 10000
 
-data = pd.read_csv('./dataset_csv_files/dataset4.csv', header=None)
-a = np.array(data.iloc[:, 0:2])
-b = np.array(data.iloc[:, 2])
+dataset_num = 1
+a = sparse.load_npz('./dataset_sparse_files/dataset'+str(dataset_num)+'_train.npz')
+b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy')
+m, n = a.shape
 
 initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
-m = b.size
 
 lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-7, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
 
