@@ -61,7 +61,7 @@ def armijo(f, f_grad, x_k: np.array, d_k: np.array, s: float, sigma: float, gamm
         alpha_k *= sigma
     return alpha_k
 
-## GM
+##GM
 #define our stepsize_strategies dictionary
 stepsize_strategies = {"backtrack": armijo}
 
@@ -100,13 +100,28 @@ def gradient_method(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_ite
             break        
         print(np.linalg.norm(f_grad(x_k)))
         k += 1
-        
+        print(np.linalg.norm(f_grad(x_k)))
         result.append([k, x_k.tolist(), alpha_k, f(x_k), np.linalg.norm(f_grad(x_k))])
     xk_result = np.array(result[-1][1]).reshape(-1,1)
     plot_result(m, xk_result)
     return result
 
-## AGM
+# Main begin
+n = 2 #number of features
+delta = 1e-3
+Lambda = 0.1
+max_iter = 1000
+
+data = pd.read_csv('/home/ubuntu/MDS6106Project/MDS6106Project/dataset_csv_files/dataset2.csv', header=None)
+a = np.array(data.iloc[:, 0:2])
+b = np.array(data.iloc[:, 2])
+
+initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
+m = b.size
+
+gm_result = gradient_method(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter)
+
+##AGM
 def AGM(f, f_grad, x_0: np.array, tol: float, max_iter: int, L: float):
     """
     Input: funtion: f, the gradient of f: f_grad, initial point: x_0, tolerence: tol,
@@ -145,11 +160,16 @@ def AGM(f, f_grad, x_0: np.array, tol: float, max_iter: int, L: float):
             break        
         
         k += 1
-        
+        print(np.linalg.norm(f_grad(x_k)))
         result.append([k, x_k.tolist(), alpha_k, f(x_k), np.linalg.norm(f_grad(x_k))])
         
     return result
 
+<<<<<<< HEAD
+L = np.linalg.norm(a)**2/4/m
+
+AGM_result = AGM(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, max_iter=max_iter, L=L)
+=======
 #Data
 # Main begin
 n = 2 #number of features
@@ -167,4 +187,5 @@ m = b.size
 #gm
 result = gradient_method(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter)
 
+>>>>>>> 31d08c762eec39d5dddd4409fe5464ffbd94268c
 
