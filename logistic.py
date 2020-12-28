@@ -34,7 +34,7 @@ def plot_result(m, xk, num_fig):
     plt.xlabel('$a_1$')
     plt.ylabel('$a_2$')
     plt.savefig('./figures_with_seperate_line/'+'Logistic_dataset'+str(dataset_num)+method[num_fig-1]+'.pdf', dpi=1000)
-    
+
 def plot_convergence(y, subfig_num):
     plt.figure(10, figsize=(12,8))
     plt.subplot(3,1,subfig_num)
@@ -116,10 +116,11 @@ def gradient_method(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_ite
     """
     x_k = np.array(x_0.tolist())
     k, alpha_k = 0, 0    
+    norm_gradient_list = []
     
     result = [['iteration k', 'x_k', 'alpha_k', 'f(x_k)', 'norm of f_grad(x_k)']]
     result.append([k, x_k.tolist(), alpha_k, f(x_k), np.linalg.norm(f_grad(x_k))])
-    
+    norm_gradient_list.append(np.linalg.norm(f_grad(x_k)))
     stepsize_strategy = stepsize_strategies[stepsize]
     
     
@@ -140,13 +141,12 @@ def gradient_method(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_ite
             print('max iteration:',
                   k, 'the function value is', f(x_k), 'the norm of gradient is:', np.linalg.norm(f_grad(x_k)))
             break        
-        print(np.linalg.norm(f_grad(x_k)))
         k += 1
-        print(np.linalg.norm(f_grad(x_k)))
+        norm_gradient_list.append(np.linalg.norm(f_grad(x_k)))
         result.append([k, x_k.tolist(), alpha_k, f(x_k), np.linalg.norm(f_grad(x_k))])
     
     xk_result = np.array(result[-1][1]).reshape(-1,1)
-    norm_gradient_list = np.array(gm_result)[1:,-1].shape
+    norm_gradient_list = np.array(norm_gradient_list)
     plot_convergence(norm_gradient_list, 1)
     print("iterations:", k)
     plot_result(m, xk_result, 1)
@@ -166,7 +166,7 @@ def AGM(f, f_grad, x_0: np.array, tol: float, max_iter: int, L: float):
     x_pre = np.array(x_0.tolist())
     x_k = np.array(x_0.tolist()) #x_next
     k = 0
-    
+    norm_gradient_list = []
     t_pre, t_next = 1, 1
     beta_k = 0
     y_k = x_pre
@@ -174,7 +174,7 @@ def AGM(f, f_grad, x_0: np.array, tol: float, max_iter: int, L: float):
     
     result = [['iteration k', 'x_k', 'alpha_k', 'f(x_k)', 'norm of f_grad(x_k)']]
     result.append([k, x_k.tolist(), alpha_k, f(x_k), np.linalg.norm(f_grad(x_k))])
-    
+    norm_gradient_list.append(np.linalg.norm(f_grad(x_k)))
     
     while np.linalg.norm(f_grad(x_k)) > tol:
         
@@ -193,11 +193,11 @@ def AGM(f, f_grad, x_0: np.array, tol: float, max_iter: int, L: float):
             break        
         
         k += 1
-        print(np.linalg.norm(f_grad(x_k)))
+        norm_gradient_list.append(np.linalg.norm(f_grad(x_k)))
         result.append([k, x_k.tolist(), alpha_k, f(x_k), np.linalg.norm(f_grad(x_k))])
    
     xk_result = np.array(result[-1][1]).reshape(-1,1)
-    norm_gradient_list = np.array(gm_result)[1:,-1].shape
+    norm_gradient_list = np.array(norm_gradient_list)
     plot_convergence(norm_gradient_list, 2)
     print("iterations:", k)
     plot_result(m, xk_result, 2)
@@ -217,9 +217,11 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
     
     k, x_k = 0, np.array(x_0.tolist())
     alpha_k = 0
+    norm_gradient_list = []
     
     result = [['iteration k', 'x_k', 'alpha_k', 'f(x_k)', 'norm of f_grad(x_k)']]
     result.append([k, x_k.tolist(), alpha_k, f(x_k), np.linalg.norm(f_grad(x_k))])
+    norm_gradient_list.append(np.linalg.norm(f_grad(x_k)))
     
     #initiate yk_list and sk_list
     y_list, s_list = [], []
@@ -236,6 +238,7 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
     
     x_next = x_k + alpha_k*d_k
     k = k + 1
+    norm_gradient_list.append(np.linalg.norm(f_grad(x_next)))
     result.append([k, x_next.tolist(), alpha_k, f(x_next), np.linalg.norm(f_grad(x_next))]) #first step
     while np.linalg.norm(f_grad(x_next)) >= tol:
         
@@ -287,7 +290,7 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
         x_next = x_next + alpha_k*d_k
     
         k += 1
-        print(np.linalg.norm(f_grad(x_next)))
+        norm_gradient_list.append(np.linalg.norm(f_grad(x_next)))
         result.append([k, x_next.tolist(), alpha_k, f(x_next), np.linalg.norm(f_grad(x_next))])
         
         if k == max_iter:
@@ -296,7 +299,7 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
             break 
     
     xk_result = np.array(result[-1][1]).reshape(-1,1)
-    norm_gradient_list = np.array(gm_result)[1:,-1].shape
+    norm_gradient_list = np.array(norm_gradient_list)
     plot_convergence(norm_gradient_list, 3)
     print("iterations:", k)
     plot_result(m, xk_result, 3)
@@ -306,9 +309,9 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
 # Main begin
 delta = 1e-3
 Lambda = 0.1
-max_iter = 100
+max_iter = 100000
 
-dataset_num = 1
+dataset_num = 4
 data = pd.read_csv('./dataset_csv_files/dataset'+str(dataset_num)+'.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
@@ -318,15 +321,16 @@ initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
 
 print("----------GM----------")
 start = time.time()
-gm_result = gradient_method(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter)
+gm_result = gradient_method(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-7, stepsize='backtrack', max_iter=max_iter)
 stop = time.time()
 print("time:", stop - start)
 print()
 
+
 print("----------AGM----------")
 start = time.time()
 L = np.linalg.norm(a)**2/4/m
-AGM_result = AGM(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, max_iter=max_iter, L=L)
+AGM_result = AGM(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-7, max_iter=max_iter, L=L)
 stop = time.time()
 print("time:", stop - start)
 print()
@@ -338,4 +342,3 @@ lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k
 stop = time.time()
 print("time:", stop - start)
 print()
-
