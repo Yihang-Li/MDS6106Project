@@ -110,9 +110,9 @@ def gradient_method(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_ite
 n = 2 #number of features
 delta = 1e-3
 Lambda = 0.1
-max_iter = 1000
+max_iter = 10000
 
-data = pd.read_csv('/home/ubuntu/MDS6106Project/MDS6106Project/dataset_csv_files/dataset2.csv', header=None)
+data = pd.read_csv('./dataset_csv_files/dataset2.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
 
@@ -165,27 +165,8 @@ def AGM(f, f_grad, x_0: np.array, tol: float, max_iter: int, L: float):
         
     return result
 
-<<<<<<< HEAD
 L = np.linalg.norm(a)**2/4/m
 
-AGM_result = AGM(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, max_iter=max_iter, L=L)
-=======
-#Data
-# Main begin
-n = 2 #number of features
-delta = 1e-3
-Lambda = 0.1
-max_iter = 100000
+#AGM_result = AGM(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, max_iter=max_iter, L=L)
 
-data = pd.read_csv('./dataset_csv_files/dataset4.csv', header=None)
-a = np.array(data.iloc[:, 0:2])
-b = np.array(data.iloc[:, 2])
-
-initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
-m = b.size
-
-#gm
-result = gradient_method(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter)
-
->>>>>>> 31d08c762eec39d5dddd4409fe5464ffbd94268c
 
