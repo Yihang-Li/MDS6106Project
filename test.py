@@ -32,12 +32,12 @@ def phi_plus(t):
     else:
         return t - delta/2
 
-def f_svm(xk, m, Lambda):
+def f_svm(xk, Lambda):
     xk = xk.reshape(-1, 1)
     x = xk[:-1]
     y = xk[-1][0]
     return Lambda/2 * np.linalg.norm(x)**2 + sum(map(phi_plus, 1 - b * (np.dot(a,x) + y).reshape(-1)))
-def df(xk, m, Lambda):
+def df(xk,Lambda):
     xk = xk.reshape(-1, 1)
     x = xk[:-1]
     y = xk[-1][0]
@@ -53,21 +53,60 @@ def df(xk, m, Lambda):
 
 
 def f_logit(xk, Lambda):
+    
     x, y = xk[:-1], xk[-1]
     Log = np.log(1+np.exp(-b*(a.dot(x)+y)))
     return Lambda/2 * np.linalg.norm(x)**2 + Log.sum()/m
 
 def df_logit(xk, Lambda):
+
+    
     x = xk[:-1]
     y = xk[-1]
 
     grad = np.zeros((x.size+1, 1)).reshape(-1)
     df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1,1)*(-b.reshape(-1, 1)*a)
     grad[:-1] = Lambda * x + np.sum(df_Log,axis=0)/m
-    df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1,1)*(-b)
+    df_Log = (np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)) /(1+np.exp(-b.reshape(-1)*(a.dot(x)+y).reshape(-1)))).reshape(-1)*(-b)
     grad[x.size] = df_Log.sum()/m
     return grad.reshape(-1,)
 
+'''
+def df_logit(xk, Lambda):
+    xk = xk.reshape(-1, 1)
+    x = xk[:-1]
+    y = xk[-1][0]
+    
+    grad = np.zeros((x.size+1, 1))
+    t = np.exp(b * (np.dot(a,x) + y).reshape(-1))
+    
+    t = (1+t) / t
+
+    grad[:-1] = Lambda*x + (np.sum(t.reshape(-1,1) * (-b.reshape(-1,1) * a), axis=0)/m).reshape(-1,1)
+    grad[x.size] = np.sum(-t * b)/m
+    return grad.reshape(-1,)
+
+def df_logit(xk, Lambda):
+    xk = xk.reshape(-1, 1)
+    x = xk[:-1]
+    y = xk[-1][0]
+    grad = np.zeros((x.size+1, 1))
+    # derivative for x1-xn 
+    for k in np.arange(x.size): #df_xk
+        Sum = 0
+        for i in np.arange(m):
+            df_Log = np.exp(-b[i]*(a[i].dot(x)+y))/(1+np.exp(-b[i]*(a[i].dot(x)+y)))*(-b[i]*a[i])[k]
+            Sum = Sum + df_Log
+        grad[k] = Lambda * x[k] + Sum/m
+    
+    # derivative for y
+    Sum = 0
+    for i in np.arange(m):
+        df_Log = np.exp(-b[i]*(a[i].dot(x)+y))/(1+np.exp(-b[i]*(a[i].dot(x)+y)))*(-b[i])
+        Sum = Sum + df_Log
+    grad[x.size] = Sum/m
+    return grad.reshape(-1)
+'''
 #backtrack(armijo)
 def armijo(f, f_grad, x_k: np.array, d_k: np.array, s: float, sigma: float, gamma: float):
     """
@@ -190,6 +229,6 @@ b = np.array(data.iloc[:, 2])
 initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
 m = b.size
 
-lbfgs_result = L_BFGS(lambda x_k: f_svm(x_k, m, Lambda), lambda x_k: df(x_k, m, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
+lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
 
 lbfgs_result
