@@ -68,7 +68,7 @@ def Stochastic_gradient_method(f_i, f_grad_i, x_0: np.array, batch: int, tol: fl
 
         k += 1
         # print(np.mean([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index], axis=0))
-        print(min([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index]))
+        print(k, min([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index]))
         # result.append([k, x_k.tolist(), alpha_k, np.mean([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index], axis=0)])
         result.append([k, x_k.tolist(), alpha_k, min([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index])])
         if min([np.linalg.norm(f_grad_i(x_k, i)) for i in batch_index]) <= tol:
@@ -83,9 +83,9 @@ def Stochastic_gradient_method(f_i, f_grad_i, x_0: np.array, batch: int, tol: fl
 # Main begin
 delta = 1e-3
 Lambda = 0.1
-max_iter = 100000
+max_iter = 10000
 
-dataset_num = 4
+dataset_num = 1
 data = pd.read_csv('./dataset_csv_files/dataset'+str(dataset_num)+'.csv', header=None)
 a = np.array(data.iloc[:, 0:2])
 b = np.array(data.iloc[:, 2])
