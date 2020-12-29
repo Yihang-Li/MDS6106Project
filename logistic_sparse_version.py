@@ -8,7 +8,7 @@ import time
 
 plt.style.use("ggplot")
 method = ['GM', 'AGM', 'L-BFGS']
-color_list = ['blue', 'orange', 'purple', 'darkred', 'red', 'cyan', 'yellow', 'teal',
+color_list = ['blue', 'orange', 'purple', 'darkred', 'red', 'yellow', 'teal',
               'coral', 'brown', 'black']
 
 def Normalize(features):
@@ -38,9 +38,9 @@ def plot_convergence(y, subfig_num):
 
 def test(xk):
 
-    a_test = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_test.mat')['A']
-    b_test = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_test_label.mat')['b'].reshape(-1)
-    a_test = Normalize(a_test)
+    # a_test = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_test.mat')['A']
+    # b_test = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_test_label.mat')['b'].reshape(-1)
+    # a_test = Normalize(a_test)
     
     m_test = b_test.size
     x = xk[:-1]
@@ -273,7 +273,7 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
         x_next = x_next + alpha_k*d_k
     
         k += 1
-        print(k, np.linalg.norm(f_grad(x_next)))
+        # print(k, np.linalg.norm(f_grad(x_next)))
         result.append([k, x_next.tolist(), alpha_k, f(x_next), np.linalg.norm(f_grad(x_next))])
         norm_gradient_list.append(np.linalg.norm(f_grad(x_next)))
         
@@ -284,17 +284,16 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
     
     xk_result = np.array(result[-1][1]).reshape(-1,1)
     norm_gradient_list = np.array(norm_gradient_list)
-    plot_convergence(norm_gradient_list, 3)
-    print("iterations:", k)
-    print("accuracy:", test(xk_result))
-    return result
-
+    # plot_convergence(norm_gradient_list, 3)
+    # print("iterations:", k)
+    # print("accuracy:", test(xk_result))
+    #return result
+    return test(xk_result)
 
 # Main begin
 delta = 1e-3
-Lambda = 0.1
 max_iter = 10000
-dataset_name = 'gisette'
+dataset_name = 'mushrooms'
 
 """
 dataset_num = 4
@@ -303,17 +302,7 @@ b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy
 m, n = a.shape
 
 """
-a = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_train.mat')['A']
-b = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_train_label.mat')['b'].reshape(-1)
 
-#normalize
-a = Normalize(a)
-#a, a_test, b, b_test = Split(a,b,test_size=0.3)
-
-m, n = a.shape
-
-
-initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
 """
 print("----------GM----------")
 start = time.time()
@@ -321,7 +310,6 @@ gm_result = gradient_method(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_log
 stop = time.time()
 print("time:", stop - start)
 print()
-"""
 
 print("----------AGM----------")
 start = time.time()
@@ -337,4 +325,47 @@ lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k
 stop = time.time()
 print("time:", stop - start)
 print()
+"""
+dataset_name_list = ['mushrooms', 'breast-cancer', 'phishing']
+Lambda_list = np.logspace(-6, 0.7, 30)
+i=0
+
+for dataset_name in dataset_name_list:
+    a = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_train.mat')['A']
+    b = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_train_label.mat')['b'].reshape(-1)
+
+    #normalize
+    a = Normalize(a)
+    a, a_test, b, b_test = Split(a,b,test_size=0.3)
+    m, n = a.shape
+    
+    
+    initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
+    accuracy_list = []
+    for Lambda in Lambda_list:
+        print(Lambda)
+        accuracy = lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
+        accuracy_list.append(accuracy)
+    plt.plot(Lambda_list, accuracy_list, color=color_list[i+1], label=dataset_name_list[i], linewidth=2)
+    i = i + 1
+    plt.xlabel(r'$\lambda$')
+    plt.ylabel('Accuracy')
+
+plt.legend(loc='best',edgecolor='black', facecolor='white')
+plt.savefig('parameters_lambda.pdf', dpi=1000)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
