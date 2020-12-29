@@ -66,7 +66,7 @@ def plot_convergence(y, subfig_num):
     plt.plot(x, y, label = method[subfig_num-1], color = color_list[subfig_num], linewidth=2)
     plt.legend(loc='best',edgecolor='black', facecolor='white') #设置图例边框颜色
     plt.xlabel('number of iterations')
-    plt.ylabel(r'$log\left(\nabla f(x,y)\right)$')
+    plt.ylabel(r'$log\left(||\nabla f(x,y)||\right)$')
     plt.tight_layout()
     plt.savefig('./figures_convergence/SVM_convergence_dataset'+str(dataset_num)+'.pdf', dpi=1000)
     
