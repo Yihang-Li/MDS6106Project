@@ -23,10 +23,34 @@ def df_logit(xk, Lambda):
     grad[x.size] = df_Log.sum()/m
     return grad.reshape(-1,)
 
+def phi_plus(t):
+    if t <= delta:
+        return 1/(2*delta) * (max(0, t)**2)
+    else:
+        return t - delta/2
+
+def f_svm(xk, Lambda):
+    xk = xk.reshape(-1, 1)
+    x = xk[:-1]
+    y = xk[-1][0]
+    return Lambda/2 * np.linalg.norm(x)**2 + sum(map(phi_plus, 1 - b * (a @ x + y).reshape(-1)))
+def df(xk, Lambda):
+    xk = xk.reshape(-1, 1)
+    x = xk[:-1]
+    y = xk[-1][0]
+    grad = np.zeros((x.size+1, 1))
+    t = 1 - b * (a @ x + y).reshape(-1)
+    dphi_list = np.zeros(m)
+    dphi_list[t>delta] = 1
+    dphi_list[(0<t) & (t<delta)] = t[(0<t) & (t<delta)]/delta
+    grad[:-1] = Lambda*x + ((dphi_list * (-b)) @ a).reshape(-1,1)
+    grad[x.size] = np.sum(-dphi_list * b)
+    return grad.reshape(-1)
+
 def test(xk):
     
-    a = loadmat('../final_project/datasets/news20/news20_train.mat')['A']
-    b = loadmat('../final_project/datasets/news20/news20_train_label.mat')['b'].reshape(-1)
+    a = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train.mat')['A']
+    b = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train_label.mat')['b'].reshape(-1)
     m_test = b.size
     x = xk[:-1]
     y = xk[-1][0]
@@ -168,7 +192,7 @@ def L_BFGS(f, f_grad, x_0: np.array, tol: float, stepsize: str, max_iter: int, m
 # Main begin
 Lambda = 0.1
 max_iter = 10000
-
+delta = 1e-3
 """
 dataset_num = 1
 a = sparse.load_npz('./dataset_sparse_files/dataset'+str(dataset_num)+'_train.npz')
@@ -176,12 +200,14 @@ b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy
 m, n = a.shape
 """
 
-a = loadmat('../final_project/datasets/news20/news20_train.mat')['A']
-b = loadmat('../final_project/datasets/news20/news20_train_label.mat')['b'].reshape(-1)
+a = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train.mat')['A']
+b = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train_label.mat')['b'].reshape(-1)
 m, n = a.shape
 
 initial = np.zeros((n+1, 1)).reshape(-1,) #the last element is y
 
-lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-7, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
+lbfgs_result = L_BFGS(lambda x_k: f_logit(x_k, Lambda), lambda x_k: df_logit(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
+
+#lbfgs_result = L_BFGS(lambda x_k: f_svm(x_k, Lambda), lambda x_k: df(x_k, Lambda), initial, tol=1e-4, stepsize='backtrack', max_iter=max_iter, m_lbfgs= 5)
 
 lbfgs_result

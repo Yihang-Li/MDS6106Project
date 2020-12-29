@@ -5,6 +5,27 @@ import time
 from scipy import sparse
 from scipy.io import loadmat
 
+plt.style.use("ggplot")
+method = ['GM', 'AGM', 'BFGS']
+color_list = ['blue', 'orange', 'purple', 'darkred', 'red', 'cyan', 'yellow', 'teal',
+              'coral', 'brown', 'black']
+
+def Normalize(features, method):
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.preprocessing import MaxAbsScaler
+    if (method == 1):
+        features = features.todense()
+        scaler = StandardScaler()
+    else:
+        scaler = MaxAbsScaler()
+    features = scaler.fit_transform(features)
+    return features
+
+def Split(features,labels,test_size=0.3):
+    from sklearn.model_selection import train_test_split
+    x_train,x_test,y_train,y_test = train_test_split(features,labels,test_size = test_size,random_state=0)
+    return x_train, x_test, y_train,y_test
+
 def phi_plus(t):
     if t <= delta:
         return 1/(2*delta) * (max(0, t)**2)
@@ -26,45 +47,39 @@ def df(xk, m, Lambda):
     grad[:-1] = Lambda*x + ((dphi_list * (-b)) @ a).reshape(-1,1)
     grad[x.size] = np.sum(-dphi_list * b)
     return grad
-def plot_result(m, xk):
-    m1 = m2 = 0
-    for i in np.arange(m):
-        if b[i] == 1:
-            m1 = m1 + 1
-        else:
-            m2 = m2 + 1
-            
-    s = 2 # control the point size
-    x = a[0:m1, 0].toarray()
-    y = a[0:m1, 1].toarray()
-    plt.scatter(x, y, c='purple', s=s)
-    x = a[m1:, 0].toarray()
-    y = a[m1:, 1].toarray()
-    plt.scatter(x, y, c='orange', s=s)
-    
-    A = xk[0][0]
-    B = xk[1][0]
-    C = xk[2][0]
-    x = a[:,0].toarray()
-    y = (-A*x-C)/B
-    plt.plot(x, y, color='red')
+def plot_convergence(y, subfig_num):
+    plt.figure(1, figsize=(12,5.2))
+    plt.subplot(2,1,subfig_num-1)
+    n = y.size
+    x = np.arange(n)
+    y = np.log(y)
+    plt.plot(x, y, label = method[subfig_num-1], color = color_list[subfig_num], linewidth=2)
+    plt.legend(loc='best',edgecolor='black', facecolor='white') #设置图例边框颜色
+    plt.xlabel('number of iterations')
+    plt.ylabel(r'$log\left(||\nabla f(x,y)||\right)$')
+    plt.tight_layout()
+    plt.savefig('./figures_convergence/SVM_convergence_dataset_'+dataset_name+'.pdf', dpi=1000)
 def test(xk):
     
-    a = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train.mat')['A']
-    b = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train_label.mat')['b'].reshape(-1)
-    m_test = b.size
+    a_test = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_test.mat')['A']
+    b_test = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_test_label.mat')['b'].reshape(-1)
+    a_test = Normalize(a_test, 2)
+    
+    m_test = b_test.size
     x = xk[:-1]
     y = xk[-1][0]
-    accuracy = np.sum(np.abs((2 * ((a.dot(x) + y > 0) + 0) - 1).reshape(-1) + b))/(2*m_test)
+    accuracy = np.sum(np.abs((2 * ((a_test.dot(x) + y > 0) + 0) - 1).reshape(-1) + b_test))/(2*m_test)
     return accuracy   
 def gradient_method(initial, m, Lambda):
     s = 1
     sigma = 0.5
     gamma = 0.1
-    tol = 1e-8
+    tol = 1e-4
     
     xk = initial
     gradient = df(initial, m, Lambda)
+    norm_gradient_list = []
+    norm_gradient_list.append(np.linalg.norm(gradient))
     num_iteration = 0
     
     while np.linalg.norm(gradient) > tol and num_iteration < max_iter:
@@ -77,21 +92,23 @@ def gradient_method(initial, m, Lambda):
         
         xk = xk + alphak * dk
         gradient = df(xk, m, Lambda)
-        #print(np.linalg.norm(gradient))
-        #print(xk)
-        print(np.linalg.norm(gradient))
+        norm_gradient_list.append(np.linalg.norm(gradient))
         num_iteration = num_iteration + 1
-    print(xk)
-    plot_result(m, xk)
-    print(test(xk))
+        print(num_iteration, np.linalg.norm(gradient))
+    norm_gradient_list = np.array(norm_gradient_list)
+    plot_convergence(norm_gradient_list, 1)
+    print("iterations:", num_iteration)
+    print("accuracy:", test(xk))
 
 def AGM(initial, m, Lambda):
     x_minus = xk = initial
     t_minus = tk = 1
     alpha = 0.5
     yita = 0.5
-    tol = 1e-8
+    tol = 1e-4
     gradient = df(initial, m, Lambda)
+    norm_gradient_list = []
+    norm_gradient_list.append(np.linalg.norm(gradient))
     num_iteration = 0
     
     while np.linalg.norm(gradient) > tol and num_iteration < max_iter:
@@ -104,14 +121,17 @@ def AGM(initial, m, Lambda):
         t_minus = tk
         tk = 0.5 * (1 + np.sqrt(1+4*tk**2))
         x_minus = xk
+        
         xk = x_bar
         gradient = df(xk, m, Lambda)
+        norm_gradient_list.append(np.linalg.norm(gradient))
+        print(num_iteration, np.linalg.norm(gradient))
         num_iteration = num_iteration + 1
-        print(np.linalg.norm(gradient))
-    print(xk)
-    plot_result(m, xk)
-    print(test(xk))
 
+    norm_gradient_list = np.array(norm_gradient_list)
+    plot_convergence(norm_gradient_list, 2)
+    print("iterations:", num_iteration)
+    print("accuracy:", test(xk))
 def BFGS(initial, m, Lambda):
     Hk = np.identity(n+1)
     xk = initial
@@ -120,6 +140,8 @@ def BFGS(initial, m, Lambda):
     gamma = 0.1
     tol = 1e-4
     gradient = df(initial, m, Lambda)
+    norm_gradient_list = []
+    norm_gradient_list.append(np.linalg.norm(gradient))
     num_iteration = 0
     
     while np.linalg.norm(gradient) > tol and num_iteration < max_iter:
@@ -143,35 +165,57 @@ def BFGS(initial, m, Lambda):
         num_iteration = num_iteration + 1
         xk = xk_new
         gradient = df(xk, m, Lambda)
-        print(num_iteration)
-        print(np.linalg.norm(gradient))
-        
-    print(xk)
-    plot_result(m, xk)
-    print(test(xk))
+        norm_gradient_list.append(np.linalg.norm(gradient))
+        print(num_iteration, np.linalg.norm(gradient))
+    
+    norm_gradient_list = np.array(norm_gradient_list)
+    plot_convergence(norm_gradient_list, 3)
+    print("iterations:", num_iteration)
+    print("accuracy:", test(xk))
     
 # Main begin
-n = 2 #number of features
 delta = 1e-3
 Lambda = 0.1
-max_iter = 20000
+max_iter = 1000
+dataset_name = 'a9a'
 
 """
 dataset_num = 1
 a = sparse.load_npz('./dataset_sparse_files/dataset'+str(dataset_num)+'_train.npz')
 b = np.load('./dataset_sparse_files/dataset'+str(dataset_num)+'_train_labels.npy')
 """
-a = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train.mat')['A']
-b = loadmat('../final_project/datasets/breast-cancer/breast-cancer_train_label.mat')['b'].reshape(-1)
+a = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_train.mat')['A']
+b = loadmat('../final_project/datasets/'+dataset_name+'/'+dataset_name+'_train_label.mat')['b'].reshape(-1)
+a = a[:, :-1]
+#normalize
+a = Normalize(a, 2)
+#a, a_test, b, b_test = Split(a,b,test_size=0.3)
+
 m, n = a.shape
 
-
 initial = np.zeros((n+1, 1)) #the last element is y
-m = b.size
 
-#gradient_method(initial, m, Lambda)
-#AGM(initial, m, Lambda)
+"""
+print("----------GM----------")
+start = time.time()
+gradient_method(initial, m, Lambda)
+stop = time.time()
+print("time:", stop - start)
+print()
+"""
+
+print("----------AGM----------")
+start = time.time()
+AGM(initial, m, Lambda)
+stop = time.time()
+print("time:", stop - start)
+print()
+
+print("----------BFGS----------")
+start = time.time()
 BFGS(initial, m, Lambda)
-
+stop = time.time()
+print("time:", stop - start)
+print()
 
 
