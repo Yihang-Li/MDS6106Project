@@ -317,3 +317,38 @@
        accuracy: 0.973
        time: 605.1596190929413
 
+**SGD:
+
+1. our dataset
+
+   iterations: 100000
+   accuracy: 0.923
+   time: 14.02909517288208
+
+   iterations: 100000
+   accuracy: 0.995
+   time: 15.042160987854004
+
+   iterations: 100000
+   accuracy: 0.991
+   time: 14.347018957138062
+
+   iterations: 100000
+   accuracy: 0.993
+   time: 15.549546957015991
+
+2. big dataset
+
+   - phishing
+
+   iterations: 10000
+   accuracy: 0.9240277359059391
+   time: 9.924690961837769
+
+   - mushrooms
+
+   iterations: 10000
+   accuracy: 0.9606234618539786
+   time: 9.216106176376343
+
+   
