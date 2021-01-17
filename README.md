@@ -8,6 +8,6 @@
 ### To do list
 
 - [x] Create to do list
-- [ ] Generating Data by using Pytorch
-- [ ] Create Mini-Batch by using Pytorch
+- [x] Generating Data by using Pytorch
+- [x] Create Mini-Batch by using Pytorch
 - [ ] Rewrite SGD Algorithm from Scratch by using Pytorch
