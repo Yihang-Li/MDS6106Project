@@ -56,3 +56,15 @@ def data_iter(batch_size, features, labels):
 batch_size = 10
 X, y = next(iter(data_iter(batch_size, features, labels)))
 print(X, '\n', y)
+
+# %%
+###below test for logit_loss
+def logit_loss(x, y):
+    return torch.mean(torch.log(1 + torch.exp(-b*(torch.mm(a, x)+y))))
+
+# %%
+a, b = X, y
+x, y = torch.normal(0, 0.01, size=(num_features, 1), requires_grad=True), torch.zeros(size=(1, ), requires_grad=True)
+
+logit_loss(x, y)
+# %%

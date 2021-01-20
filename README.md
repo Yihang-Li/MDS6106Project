@@ -11,5 +11,8 @@
 - [X] Generating Data by using Pytorch
 - [X] Create Mini-Batch by using Pytorch
 - [ ] Solve Logistic Regression Problem from Scratch by using Pytorch
-  - [ ] Initializing Model Parameters
-  - [ ] Add More tasks here
+  - [X] Initializing Model Parameters
+  - [X] Define the Model
+  - [X] Define the Loss Function
+  - [ ] Define the Optimization Algorithm (SGD here)
+  - [ ] Training
