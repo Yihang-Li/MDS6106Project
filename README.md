@@ -7,7 +7,9 @@
 
 ### To do list
 
-- [x] Create to do list
-- [x] Generating Data by using Pytorch
-- [x] Create Mini-Batch by using Pytorch
-- [ ] Rewrite SGD Algorithm from Scratch by using Pytorch
+- [X] Create to do list
+- [X] Generating Data by using Pytorch
+- [X] Create Mini-Batch by using Pytorch
+- [ ] Solve Logistic Regression Problem from Scratch by using Pytorch
+  - [ ] Initializing Model Parameters
+  - [ ] Add More tasks here
