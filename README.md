@@ -14,5 +14,5 @@
   - [X] Initializing Model Parameters
   - [X] Define the Model
   - [X] Define the Loss Function
-  - [ ] Define the Optimization Algorithm (SGD here)
+  - [X] Define the Optimization Algorithm (SGD here)
   - [ ] Training
