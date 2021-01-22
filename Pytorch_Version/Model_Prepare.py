@@ -62,7 +62,7 @@ def eval_accuracy(net, data_iter):
 # Training
 lambd = 0.1
 x, y = initia_params()
-num_epochs, lr = 100, 0.001
+num_epochs, lr = 50, 0.001
 for epoch in range(num_epochs):
     for a, b in data_iter(batch_size, features, labels):
         with torch.enable_grad():
@@ -80,14 +80,21 @@ print('loss:', l.item(), ' accuracy:', train_accuracy)
 
 
 # %%
-plot_data(features, m1)
+# Plot result by fited parameters with separate line
+def plot_result(x, y, features, m1):
+    plot_data(features, m1)
+    A = x[0].item()
+    B = x[1].item()
+    C = (lin(a).mean() - y).item()
+    ### Note: There is some problem with this intercept term.
+    #### Maybe it shouldn't be a line, instead, we may consider the
+    ##### sigmoid function?
+    a1 = features[:,0]
+    a2 = (-A * a1 + C) / B
+    plt.plot(a1.detach(), a2.detach(), color='red')
+    plt.xlabel('$a_1$')
+    plt.ylabel('$a_2$')
+# %%
+plot_result(x, y, features, m1)
 
-A = x[0].item()
-B = x[1].item()
-C = y.item()
-x = features[:,0]
-y = (-A*x-C)/B
-plt.plot(x.detach(), y.detach(), color='red')
-plt.xlabel('$a_1$')
-plt.ylabel('$a_2$')
 # %%
