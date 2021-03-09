@@ -10,7 +10,7 @@
 - [X] Create to do list
 - [X] Generating Data
 - [X] Create Mini-Batch
-- [ ] Solve Logistic Regression Problem from Scratch
+- [ ] Solve Logistic Regression Problem from Scratch (In order to get some sense)
 
   - [X] Initializing Model Parameters
   - [X] Define the Model
@@ -21,3 +21,10 @@
   - [X] Plot the Result (With seperating line)
   - [ ] Choose $\lambda$  by using Cross-Validation
   - [ ] Rewrite the optimization algorithm (SGD, the average version)
+- [ ] Optimization Part
+
+  - [ ] Implement basic Gradient Method
+  - [ ] Implement Accelerated Gradient Method
+  - [ ] Implement BFGS
+  - [ ] Implement L-BFGS
+- [ ] SVM Part

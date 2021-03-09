@@ -10,7 +10,7 @@ num_features = 2
 
 #Generating Data
 def generate_data(c1, c2, sigma1, sigma2, m1, m2):
-    m = m1 + m2
+    m = m1 + m2 # total number of examples
     a = torch.zeros((m, num_features))
     b = torch.zeros((m, 1))
 
@@ -28,7 +28,7 @@ c1 = torch.tensor([0, 0])
 c2 = torch.tensor([4, 5])
 sigma1, sigma2 = 0.1, 1
 m1, m2 = 999, 1024
-features, labels = generate_data(c1, c2, sigma1, sigma2, m1, m2)
+features, labels = generate_data(c1, c2, sigma1, sigma2, m1, m2)  ### features = a;  labes = b
 # %%
 
 def plot_data(features, m1):
