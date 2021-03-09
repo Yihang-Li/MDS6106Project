@@ -88,6 +88,7 @@ def plot_result(x, y, features, m1):
     C = (lin(a).mean() - y).item()
     ### Note: There is some problem with this intercept term.
     ####2021/03/09: Try to fix!
+    # For different data, have different intercept?
 
     a1 = features[:,0]
     a2 = (-A * a1 + C) / B
