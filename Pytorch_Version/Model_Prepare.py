@@ -16,7 +16,7 @@ def initia_params():
 
 
 # Define the Model
-#Remember in our problem, x, y are parameters and a, b and data
+#Remember in our problem, x, y are parameters and a, b are data
 lin = lambda a: torch.mm(a, x) + y
 def sigmoid(a):
     return 1/(1+torch.exp(-a))
@@ -67,16 +67,16 @@ for epoch in range(num_epochs):
     for a, b in data_iter(batch_size, features, labels):
         with torch.enable_grad():
             l = logit_loss(x, y) + lambd * l2_penalty(x)
-        l.sum().backward()
+        l.backward() #l.sum().backward(), l here is already a scalar! no need to sum
         sgd((x, y), lr, batch_size)
         x.grad.zero_()
         y.grad.zero_()
     train_accuracy = eval_accuracy(net, data_iter(batch_size, features, labels))
     print('epoch {}'.format(epoch+1),
-        ': with accuracy {}'.format(train_accuracy))
+        ': with training accuracy {}'.format(train_accuracy))
 print('L2 norm of x:', torch.norm(x).item())
 print(x, '\n', y)
-print('loss:', l.item(), ' accuracy:', train_accuracy)
+print('loss:', l.item(), ' training accuracy:', train_accuracy)
 
 
 # %%
@@ -87,8 +87,8 @@ def plot_result(x, y, features, m1):
     B = x[1].item()
     C = (lin(a).mean() - y).item()
     ### Note: There is some problem with this intercept term.
-    #### Maybe it shouldn't be a line, instead, we may consider the
-    ##### sigmoid function?
+    ####2021/03/09: Try to fix!
+
     a1 = features[:,0]
     a2 = (-A * a1 + C) / B
     plt.plot(a1.detach(), a2.detach(), color='red')
