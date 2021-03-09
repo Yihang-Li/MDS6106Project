@@ -85,10 +85,12 @@ def plot_result(x, y, features, m1):
     plot_data(features, m1)
     A = x[0].item()
     B = x[1].item()
-    C = (lin(a).mean() - y).item()
+    C = - y.item()
+    #C = (lin(a).mean() - y).item()
     ### Note: There is some problem with this intercept term.
     ####2021/03/09: Try to fix!
     # For different data, have different intercept?
+    ## No! the truth is, the position at lin(a) should be zero!
 
     a1 = features[:,0]
     a2 = (-A * a1 + C) / B
