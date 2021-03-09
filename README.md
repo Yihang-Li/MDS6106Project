@@ -20,3 +20,4 @@
   - [X] Training
   - [X] Plot the Result (With seperating line)
   - [ ] Choose $\lambda$  by using Cross-Validation
+  - [ ] Rewrite the optimization algorithm (SGD, the average version)
