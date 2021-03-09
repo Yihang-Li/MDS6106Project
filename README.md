@@ -18,5 +18,5 @@
   - [X] Define the Optimization Algorithm (SGD, first try simplest version)
   - [X] Define Classification Accuracy and eval_accuracy for given model on specific dataset
   - [X] Training
-  - [X] Plot the Result (Fix problem here: Line or Sigmoid? Maybe the latter is more reasonable)
+  - [X] Plot the Result (With seperating line)
   - [ ] Choose $\lambda$  by using Cross-Validation
